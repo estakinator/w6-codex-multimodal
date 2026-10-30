@@ -61,6 +61,11 @@ code { font: 11px var(--mono); color: #566b58; }
 .sparkle { color: #8ca48e; font-size: 20px; }
 .result.error { color: #9b3f37; background: #fffafa; }
 .result.loading { color: #778078; }
+.result.descriptions { padding: 0 17px; }
+.description-item { padding: 16px 0; }
+.description-item + .description-item { border-top: 1px solid var(--line); }
+.description-item h3 { margin: 0 0 7px; color: var(--green); font: 11px var(--mono); overflow-wrap: anywhere; }
+.description-item p { margin: 0; color: #454c44; }
 .describe-button { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 43px; margin-top: 12px; padding: 0 14px; border: 0; border-radius: 4px; background: var(--green); color: white; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s; }
 .describe-button:not(:disabled):hover { background: var(--green-dark); }
 .describe-button:disabled { opacity: .45; cursor: not-allowed; }

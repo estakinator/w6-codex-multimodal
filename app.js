@@ -18,6 +18,7 @@ const secondRemoveImageButton = document.querySelector('#remove-image-2');
 const maxFileSize = 20 * 1024 * 1024;
 let selectedImage = null;
 let previewUrl = null;
+let secondImage = null;
 let secondPreviewUrl = null;
 let requestInProgress = false;
 
@@ -42,9 +43,8 @@ function clearImage() {
   emptyState.hidden = false;
   removeImageButton.hidden = true;
   imageMeta.textContent = 'No image selected';
-  describeButton.disabled = true;
-  showResult('Your image description\nwill appear here.');
-  result.innerHTML = '<div class="result-empty"><span class="sparkle" aria-hidden="true">✳</span><p>Your image description<br>will appear here.</p></div>';
+  updateDescribeButton();
+  renderEmptyResult();
 }
 
 function setImage(file) {
@@ -66,12 +66,21 @@ function setImage(file) {
   emptyState.hidden = true;
   removeImageButton.hidden = false;
   imageMeta.textContent = `${file.name} · ${formatSize(file.size)}`;
-  describeButton.disabled = false;
-  result.innerHTML = '<div class="result-empty"><span class="sparkle" aria-hidden="true">✳</span><p>Ready when you are.</p></div>';
+  updateDescribeButton();
+  renderEmptyResult('Ready when you are.');
+}
+
+function updateDescribeButton() {
+  describeButton.disabled = requestInProgress || (!selectedImage && !secondImage);
+}
+
+function renderEmptyResult(message = 'Your image descriptions will appear here.') {
   result.className = 'result';
+  result.innerHTML = `<div class="result-empty"><span class="sparkle" aria-hidden="true">✳</span><p>${message}</p></div>`;
 }
 
 function clearSecondImage() {
+  secondImage = null;
   secondImageInput.value = '';
   if (secondPreviewUrl) URL.revokeObjectURL(secondPreviewUrl);
   secondPreviewUrl = null;
@@ -80,6 +89,8 @@ function clearSecondImage() {
   secondEmptyState.hidden = false;
   secondRemoveImageButton.hidden = true;
   secondImageMeta.textContent = 'No image selected';
+  updateDescribeButton();
+  renderEmptyResult();
 }
 
 function setSecondImage(file) {
@@ -94,12 +105,15 @@ function setSecondImage(file) {
   }
 
   if (secondPreviewUrl) URL.revokeObjectURL(secondPreviewUrl);
+  secondImage = file;
   secondPreviewUrl = URL.createObjectURL(file);
   secondPreview.src = secondPreviewUrl;
   secondPreview.hidden = false;
   secondEmptyState.hidden = true;
   secondRemoveImageButton.hidden = false;
   secondImageMeta.textContent = `${file.name} · ${formatSize(file.size)}`;
+  updateDescribeButton();
+  renderEmptyResult('Ready when you are.');
 }
 
 imageInput.addEventListener('change', () => setImage(imageInput.files[0]));
@@ -155,7 +169,8 @@ function imageToBase64(file) {
 
 describeButton.addEventListener('click', async () => {
   const model = modelInput.value.trim();
-  if (!selectedImage || requestInProgress) return;
+  const images = [selectedImage, secondImage].filter(Boolean);
+  if (!images.length || requestInProgress) return;
   if (!model) {
     showResult('Enter the name of a vision model installed in Ollama.', 'error');
     modelInput.focus();
@@ -165,31 +180,48 @@ describeButton.addEventListener('click', async () => {
   requestInProgress = true;
   describeButton.disabled = true;
   buttonLabel.textContent = 'Looking closely…';
-  showResult('Sending the image to your local Ollama model…', 'loading');
+  result.className = 'result loading';
+  result.textContent = 'Sending images to your local Ollama model…';
 
   try {
-    const image = await imageToBase64(selectedImage);
-    const response = await fetch('http://localhost:11434/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model,
-        messages: [{
-          role: 'user',
-          content: 'Describe this image clearly and concisely. Mention the main subjects, setting, and notable details.',
-          images: [image]
-        }],
-        stream: false
-      })
-    });
+    const descriptions = [];
+    for (const file of images) {
+      result.textContent = `Describing ${file.name}…`;
+      const image = await imageToBase64(file);
+      const response = await fetch('http://localhost:11434/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model,
+          messages: [{
+            role: 'user',
+            content: 'Describe this image clearly and concisely. Mention the main subjects, setting, and notable details.',
+            images: [image]
+          }],
+          stream: false
+        })
+      });
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.error || `Ollama returned HTTP ${response.status}.`);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error || `Ollama returned HTTP ${response.status} while describing ${file.name}.`);
+      }
+      const description = data.message?.content?.trim();
+      if (!description) throw new Error(`The model returned an empty description for ${file.name}. Try a vision model such as llava or gemma3.`);
+      descriptions.push({ name: file.name, description });
     }
-    const description = data.message?.content?.trim();
-    if (!description) throw new Error('The model returned an empty description. Try a vision model such as llava or gemma3.');
-    showResult(description);
+
+    result.className = 'result descriptions';
+    result.replaceChildren(...descriptions.map(({ name, description }) => {
+      const article = document.createElement('article');
+      article.className = 'description-item';
+      const heading = document.createElement('h3');
+      heading.textContent = name;
+      const text = document.createElement('p');
+      text.textContent = description;
+      article.append(heading, text);
+      return article;
+    }));
   } catch (error) {
     const detail = error instanceof TypeError
       ? 'Could not reach Ollama. Make sure it is running and allows this page’s origin (see README).'
@@ -197,7 +229,7 @@ describeButton.addEventListener('click', async () => {
     showResult(detail, 'error');
   } finally {
     requestInProgress = false;
-    describeButton.disabled = !selectedImage;
+    updateDescribeButton();
     buttonLabel.textContent = 'Describe image';
   }
 });
