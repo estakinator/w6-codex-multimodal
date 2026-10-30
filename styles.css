@@ -12,6 +12,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { margin: 0; background: var(--paper); color: var(--ink); }
 button, input { font: inherit; }
 .shell { width: min(100% - 48px, 980px); margin: 0 auto; }
