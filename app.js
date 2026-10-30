@@ -71,7 +71,7 @@ function setImage(file) {
 }
 
 function updateDescribeButton() {
-  describeButton.disabled = requestInProgress || (!selectedImage && !secondImage);
+  describeButton.disabled = requestInProgress || !selectedImage || !secondImage;
 }
 
 function renderEmptyResult(message = 'Your image descriptions will appear here.') {
@@ -169,8 +169,8 @@ function imageToBase64(file) {
 
 describeButton.addEventListener('click', async () => {
   const model = modelInput.value.trim();
-  const images = [selectedImage, secondImage].filter(Boolean);
-  if (!images.length || requestInProgress) return;
+  const images = [selectedImage, secondImage];
+  if (!selectedImage || !secondImage || requestInProgress) return;
   if (!model) {
     showResult('Enter the name of a vision model installed in Ollama.', 'error');
     modelInput.focus();
