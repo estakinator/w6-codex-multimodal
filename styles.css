@@ -43,6 +43,8 @@ code { font: 11px var(--mono); color: #566b58; }
 .panel-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
 .panel-heading h2 { margin: 0; font-size: 13px; font-weight: 600; }
 .step { color: #a5aaa2; font: 10px var(--mono); }
+.image-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.image-slot { min-width: 0; }
 .dropzone { position: relative; display: flex; height: 260px; align-items: center; justify-content: center; overflow: hidden; border: 1px dashed #cdd5ca; border-radius: 5px; background: #fafbf9; cursor: pointer; transition: background .15s, border-color .15s; }
 .dropzone:hover, .dropzone:focus-visible, .dropzone.dragging { outline: none; background: #f1f6f0; border-color: var(--green); }
 .empty-state { display: flex; align-items: center; flex-direction: column; color: #7d837b; font-size: 12px; gap: 8px; }
@@ -77,5 +79,9 @@ footer { display: flex; justify-content: space-between; padding: 25px 2px 32px; 
   .image-panel { border-right: 0; border-bottom: 1px solid var(--line); }
   .dropzone, .result { height: 225px; min-height: 225px; }
   .result-empty { min-height: 189px; }
+}
+@media (max-width: 420px) {
+  .image-slots { grid-template-columns: 1fr; }
+  .dropzone { height: 190px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }

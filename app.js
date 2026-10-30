@@ -8,10 +8,17 @@ const describeButton = document.querySelector('#describe-button');
 const buttonLabel = document.querySelector('#button-label');
 const modelInput = document.querySelector('#model');
 const result = document.querySelector('#result');
+const secondImageInput = document.querySelector('#image-input-2');
+const secondDropzone = document.querySelector('#dropzone-2');
+const secondPreview = document.querySelector('#preview-2');
+const secondEmptyState = document.querySelector('#empty-state-2');
+const secondImageMeta = document.querySelector('#image-meta-2');
+const secondRemoveImageButton = document.querySelector('#remove-image-2');
 
 const maxFileSize = 20 * 1024 * 1024;
 let selectedImage = null;
 let previewUrl = null;
+let secondPreviewUrl = null;
 let requestInProgress = false;
 
 function showResult(message, state = '') {
@@ -64,11 +71,48 @@ function setImage(file) {
   result.className = 'result';
 }
 
+function clearSecondImage() {
+  secondImageInput.value = '';
+  if (secondPreviewUrl) URL.revokeObjectURL(secondPreviewUrl);
+  secondPreviewUrl = null;
+  secondPreview.removeAttribute('src');
+  secondPreview.hidden = true;
+  secondEmptyState.hidden = false;
+  secondRemoveImageButton.hidden = true;
+  secondImageMeta.textContent = 'No image selected';
+}
+
+function setSecondImage(file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    showResult('Please choose a valid image file.', 'error');
+    return;
+  }
+  if (file.size > maxFileSize) {
+    showResult('This image is over 20 MB. Please choose a smaller file.', 'error');
+    return;
+  }
+
+  if (secondPreviewUrl) URL.revokeObjectURL(secondPreviewUrl);
+  secondPreviewUrl = URL.createObjectURL(file);
+  secondPreview.src = secondPreviewUrl;
+  secondPreview.hidden = false;
+  secondEmptyState.hidden = true;
+  secondRemoveImageButton.hidden = false;
+  secondImageMeta.textContent = `${file.name} · ${formatSize(file.size)}`;
+}
+
 imageInput.addEventListener('change', () => setImage(imageInput.files[0]));
+secondImageInput.addEventListener('change', () => setSecondImage(secondImageInput.files[0]));
 removeImageButton.addEventListener('click', (event) => {
   event.preventDefault();
   event.stopPropagation();
   clearImage();
+});
+secondRemoveImageButton.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  clearSecondImage();
 });
 
 dropzone.addEventListener('keydown', (event) => {
@@ -77,20 +121,28 @@ dropzone.addEventListener('keydown', (event) => {
     imageInput.click();
   }
 });
+secondDropzone.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    secondImageInput.click();
+  }
+});
 
-for (const eventName of ['dragenter', 'dragover']) {
-  dropzone.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    dropzone.classList.add('dragging');
-  });
+for (const [zone, onDrop] of [[dropzone, setImage], [secondDropzone, setSecondImage]]) {
+  for (const eventName of ['dragenter', 'dragover']) {
+    zone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      zone.classList.add('dragging');
+    });
+  }
+  for (const eventName of ['dragleave', 'drop']) {
+    zone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      zone.classList.remove('dragging');
+    });
+  }
+  zone.addEventListener('drop', (event) => onDrop(event.dataTransfer.files[0]));
 }
-for (const eventName of ['dragleave', 'drop']) {
-  dropzone.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    dropzone.classList.remove('dragging');
-  });
-}
-dropzone.addEventListener('drop', (event) => setImage(event.dataTransfer.files[0]));
 
 function imageToBase64(file) {
   return new Promise((resolve, reject) => {

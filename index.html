@@ -37,21 +37,39 @@
       <div class="panels">
         <section class="panel image-panel" aria-labelledby="image-heading">
           <div class="panel-heading">
-            <h2 id="image-heading">Your image</h2>
+            <h2 id="image-heading">Your images</h2>
             <span class="step">01</span>
           </div>
-          <label class="dropzone" id="dropzone" for="image-input" tabindex="0">
-            <input id="image-input" type="file" accept="image/*" hidden>
-            <div id="empty-state" class="empty-state">
-              <span class="upload-icon" aria-hidden="true">↑</span>
-              <strong>Drop an image here</strong>
-              <span>or <span class="browse">browse files</span></span>
-              <span class="file-note">PNG, JPG, WEBP · up to 20 MB</span>
+          <div class="image-slots">
+            <div class="image-slot">
+              <label class="dropzone" id="dropzone" for="image-input" tabindex="0">
+                <input id="image-input" type="file" accept="image/*" hidden>
+                <div id="empty-state" class="empty-state">
+                  <span class="upload-icon" aria-hidden="true">↑</span>
+                  <strong>Choose first image</strong>
+                  <span>or <span class="browse">browse files</span></span>
+                  <span class="file-note">Up to 20 MB</span>
+                </div>
+                <img id="preview" class="preview" alt="First image preview" hidden>
+                <button id="remove-image" class="remove-image" type="button" aria-label="Remove first image" hidden>×</button>
+              </label>
+              <div class="image-meta" id="image-meta" aria-live="polite">No image selected</div>
             </div>
-            <img id="preview" class="preview" alt="Selected image preview" hidden>
-            <button id="remove-image" class="remove-image" type="button" aria-label="Remove selected image" hidden>×</button>
-          </label>
-          <div class="image-meta" id="image-meta" aria-live="polite">No image selected</div>
+            <div class="image-slot">
+              <label class="dropzone" id="dropzone-2" for="image-input-2" tabindex="0">
+                <input id="image-input-2" type="file" accept="image/*" hidden>
+                <div id="empty-state-2" class="empty-state">
+                  <span class="upload-icon" aria-hidden="true">↑</span>
+                  <strong>Choose another image</strong>
+                  <span>or <span class="browse">browse files</span></span>
+                  <span class="file-note">Up to 20 MB</span>
+                </div>
+                <img id="preview-2" class="preview" alt="Second image preview" hidden>
+                <button id="remove-image-2" class="remove-image" type="button" aria-label="Remove second image" hidden>×</button>
+              </label>
+              <div class="image-meta" id="image-meta-2" aria-live="polite">No image selected</div>
+            </div>
+          </div>
         </section>
 
         <section class="panel result-panel" aria-labelledby="result-heading">
