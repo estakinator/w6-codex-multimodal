@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f3">
+  <title>Image Describer · Local AI</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Image Describer home">
+        <span class="brand-mark" aria-hidden="true">◈</span>
+        <span>LOCAL<span class="brand-light">VISION</span></span>
+      </a>
+      <span class="local-indicator"><span class="status-dot"></span> Runs on your device</span>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">A private look at your image</p>
+      <h1 id="page-title">See what’s<br><span>in the picture.</span></h1>
+      <p class="lede">Choose an image and your local Ollama model will describe what it sees. Your image stays on your machine.</p>
+    </section>
+
+    <section class="workspace" aria-label="Image description tool">
+      <div class="controls">
+        <label for="model">VISION MODEL</label>
+        <div class="model-row">
+          <input id="model" name="model" type="text" value="llava" spellcheck="false" autocomplete="off" aria-describedby="model-help">
+          <span class="model-chip">OLLAMA</span>
+        </div>
+        <p id="model-help" class="field-help">Use a vision model installed in Ollama, such as <code>llava</code> or <code>gemma3</code>.</p>
+      </div>
+
+      <div class="panels">
+        <section class="panel image-panel" aria-labelledby="image-heading">
+          <div class="panel-heading">
+            <h2 id="image-heading">Your image</h2>
+            <span class="step">01</span>
+          </div>
+          <label class="dropzone" id="dropzone" for="image-input" tabindex="0">
+            <input id="image-input" type="file" accept="image/*" hidden>
+            <div id="empty-state" class="empty-state">
+              <span class="upload-icon" aria-hidden="true">↑</span>
+              <strong>Drop an image here</strong>
+              <span>or <span class="browse">browse files</span></span>
+              <span class="file-note">PNG, JPG, WEBP · up to 20 MB</span>
+            </div>
+            <img id="preview" class="preview" alt="Selected image preview" hidden>
+            <button id="remove-image" class="remove-image" type="button" aria-label="Remove selected image" hidden>×</button>
+          </label>
+          <div class="image-meta" id="image-meta" aria-live="polite">No image selected</div>
+        </section>
+
+        <section class="panel result-panel" aria-labelledby="result-heading">
+          <div class="panel-heading">
+            <h2 id="result-heading">Description</h2>
+            <span class="step">02</span>
+          </div>
+          <div class="result" id="result" aria-live="polite" aria-atomic="true">
+            <div class="result-empty">
+              <span class="sparkle" aria-hidden="true">✳</span>
+              <p>Your image description<br>will appear here.</p>
+            </div>
+          </div>
+          <button id="describe-button" class="describe-button" type="button" disabled>
+            <span id="button-label">Describe image</span><span aria-hidden="true">↗</span>
+          </button>
+        </section>
+      </div>
+      <p class="connection-note"><span aria-hidden="true">⌁</span> Ollama must be running locally at <code>localhost:11434</code>.</p>
+    </section>
+
+    <footer><span>YOUR IMAGES STAY LOCAL</span><span>POWERED BY OLLAMA</span></footer>
+  </main>
+</body>
+</html>
